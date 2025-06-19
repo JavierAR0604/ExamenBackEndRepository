@@ -48,8 +48,8 @@ namespace ExamenApi.Controllers
             }
         }
 
-        [HttpPost("ObtenerTareaPorId")]
-        public async Task<ActionResult<TareaDTO>> GetById([FromBody] int id)
+        [HttpPost("ObtenerTareaPorId/{id}")]
+        public async Task<ActionResult<TareaDTO>> GetById( int id)
         {
             try
             {
@@ -128,8 +128,8 @@ namespace ExamenApi.Controllers
             }
         }
 
-        [HttpPost("ActualizarTarea")]
-        public async Task<IActionResult> Update([FromBody] TareaDTO tareaDTO)
+        [HttpPost("ActualizarTarea/{id}")]
+        public async Task<IActionResult> Update(int id,[FromBody] TareaDTO tareaDTO)
         {
             try
             {
@@ -138,16 +138,18 @@ namespace ExamenApi.Controllers
                     return BadRequest("Los datos de la tarea son requeridos");
                 }
 
-                if (tareaDTO.IdTarea <= 0)
+                if (id <= 0)
                 {
                     return BadRequest("El ID de la tarea debe ser mayor que 0");
                 }
 
-                var tareaExistente = await _tareaRepository.GetByIdAsync(tareaDTO.IdTarea);
+                var tareaExistente = await _tareaRepository.GetByIdAsync(id);
                 if (tareaExistente == null)
                 {
-                    return NotFound($"No se encontró la tarea con ID {tareaDTO.IdTarea}");
+                    return NotFound($"No se encontró la tarea con ID {id}");
                 }
+
+                tareaDTO.IdTarea = id;
 
                 var tarea = new Tarea
                 {
@@ -178,8 +180,8 @@ namespace ExamenApi.Controllers
             }
         }
 
-        [HttpPost("EliminarTarea")]
-        public async Task<IActionResult> Delete([FromBody] int id)
+        [HttpPost("eliminar/{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
@@ -208,8 +210,8 @@ namespace ExamenApi.Controllers
             }
         }
 
-        [HttpPost("obtener-por-empleado")]
-        public async Task<ActionResult<IEnumerable<TareaDTO>>> GetTareasPorEmpleado([FromBody] int idEmpleado)
+        [HttpPost("por-empleado/{idEmpleado}")]
+        public async Task<ActionResult<IEnumerable<TareaDTO>>> GetTareasPorEmpleado(int idEmpleado)
         {
             try
             {

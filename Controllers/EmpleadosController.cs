@@ -24,8 +24,8 @@ namespace ExamenApi.Controllers
             return Ok(empleados);
         }
 
-        [HttpPost("ObtenerEmpleadoPorId")]
-        public async Task<ActionResult<Empleado>> GetEmpleado([FromBody] int id)
+        [HttpPost("ObtenerEmpleadoPorId/{id}")]
+        public async Task<ActionResult<Empleado>> GetEmpleado(int id)
         {
             var empleado = await _repository.GetByIdAsync(id);
             if (empleado == null)
@@ -43,9 +43,10 @@ namespace ExamenApi.Controllers
             return CreatedAtAction(nameof(GetEmpleado), new { id }, empleado);
         }
 
-        [HttpPost("ActualizarEmpleado")]
-        public async Task<IActionResult> UpdateEmpleado([FromBody] Empleado empleado)
+        [HttpPost("ActualizarEmpleado/{id}")]
+        public async Task<IActionResult> UpdateEmpleado(int id, [FromBody] Empleado empleado)
         {
+            empleado.IdEmpleado = id;
             var success = await _repository.UpdateAsync(empleado);
             if (!success)
             {
@@ -55,8 +56,8 @@ namespace ExamenApi.Controllers
             return NoContent();
         }
 
-        [HttpPost("EliminarEmpleado")]
-        public async Task<IActionResult> DeleteEmpleado([FromBody] int id)
+        [HttpPost("EliminarEmpleado/{id}")]
+        public async Task<IActionResult> DeleteEmpleado(int id)
         {
             var success = await _repository.DeleteAsync(id);
             if (!success)
@@ -67,4 +68,5 @@ namespace ExamenApi.Controllers
             return NoContent();
         }
     }
-} 
+}
+

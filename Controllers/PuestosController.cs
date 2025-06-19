@@ -24,8 +24,8 @@ namespace ExamenApi.Controllers
             return Ok(puestos);
         }
 
-        [HttpPost("ObtenerPuestoPorId")]
-        public async Task<ActionResult<Puesto>> GetPuesto([FromBody] int id)
+        [HttpPost("ObtenerPuestoPorId/{id}")]
+        public async Task<ActionResult<Puesto>> GetPuesto(int id)
         {
             if (id <= 0)
             {
@@ -53,10 +53,10 @@ namespace ExamenApi.Controllers
             return CreatedAtAction(nameof(GetPuesto), new { id }, puesto);
         }
 
-        [HttpPost("ActualizarPuesto")]
-        public async Task<IActionResult> UpdatePuesto([FromBody] Puesto puesto)
+        [HttpPost("ActualizarPuesto/{id}")]
+        public async Task<IActionResult> UpdatePuesto(int id, [FromBody] Puesto puesto)
         {
-            if (puesto.IdPuesto <= 0)
+            if (id <= 0)
             {
                 return BadRequest("El ID del puesto es requerido");
             }
@@ -66,17 +66,19 @@ namespace ExamenApi.Controllers
                 return BadRequest("El nombre del puesto es requerido");
             }
 
+            puesto.IdPuesto = id;
+
             var success = await _repository.UpdateAsync(puesto);
             if (!success)
             {
-                return NotFound($"No se encontró el puesto con ID {puesto.IdPuesto}");
+                return NotFound($"No se encontró el puesto con ID {id}");
             }
 
             return NoContent();
         }
 
-        [HttpPost("EliminarPuesto")]
-        public async Task<IActionResult> DeletePuesto([FromBody] int id)
+        [HttpPost("EliminarPuesto/{id}")]
+        public async Task<IActionResult> DeletePuesto(int id)
         {
             if (id <= 0)
             {
