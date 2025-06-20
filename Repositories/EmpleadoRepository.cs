@@ -63,6 +63,21 @@ namespace ExamenApi.Repositories
         public override async Task<int> CreateAsync(Empleado entity)
         {
             using var connection = _dbConfig.CreateConnection();
+
+            // Si no se proporciona CodigoEmpleado, generarlo automáticamente
+            if (string.IsNullOrWhiteSpace(entity.CodigoEmpleado))
+            {
+                // Buscar el último código existente
+                var ultimoCodigo = await connection.QueryFirstOrDefaultAsync<string>(
+                    "SELECT TOP 1 CodigoEmpleado FROM Empleados WHERE CodigoEmpleado LIKE 'EMP%' ORDER BY CodigoEmpleado DESC");
+                int siguienteNumero = 1;
+                if (!string.IsNullOrEmpty(ultimoCodigo) && int.TryParse(ultimoCodigo.Substring(3), out int ultimoNumero))
+                {
+                    siguienteNumero = ultimoNumero + 1;
+                }
+                entity.CodigoEmpleado = $"EMP{siguienteNumero.ToString("D3")}";
+            }
+
             var parameters = new
             {
                 entity.CodigoEmpleado,
