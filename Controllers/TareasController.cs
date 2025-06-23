@@ -4,6 +4,7 @@ using ExamenApi.Repositories;
 using ExamenApi.DTOs;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace ExamenApi.Controllers
 {
@@ -103,6 +104,8 @@ namespace ExamenApi.Controllers
                     return BadRequest("El nombre de la tarea es requerido");
                 }
 
+                tareaDTO.Estado = GetEstadoFromProgreso(tareaDTO.Progreso);
+
                 var tarea = new Tarea
                 {
                     NombreTarea = tareaDTO.NombreTarea,
@@ -151,6 +154,8 @@ namespace ExamenApi.Controllers
 
                 tareaDTO.IdTarea = id;
 
+                tareaDTO.Estado = GetEstadoFromProgreso(tareaDTO.Progreso);
+
                 var tarea = new Tarea
                 {
                     IdTarea = tareaDTO.IdTarea,
@@ -176,8 +181,20 @@ namespace ExamenApi.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Tarea recibida para actualizar:");
+                Console.WriteLine(JsonSerializer.Serialize(tareaDTO));
+                Console.WriteLine("Error al actualizar tarea:");
+                Console.WriteLine(ex.ToString());
                 return StatusCode(500, $"Error interno del servidor: {ex.Message}");
             }
+        }
+
+        private string GetEstadoFromProgreso(int? progreso)
+        {
+            if (progreso == null || progreso == 0) return "Asignado";
+            if (progreso > 0 && progreso < 100) return "En progreso";
+            if (progreso == 100) return "Completada";
+            return string.Empty;
         }
 
         [HttpPost("eliminar/{id}")]

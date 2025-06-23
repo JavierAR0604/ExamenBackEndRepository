@@ -14,7 +14,7 @@ namespace ExamenApi.Models
         public Empleado? Recurso { get; set; }
         public int? IdPadre { get; set; }
         public Tarea? TareaPadre { get; set; }
-        public string Predecesora { get; set; } = string.Empty;
+        public int? Predecesora { get; set; }
         public string Estado { get; set; } = string.Empty;
         public int? Progreso { get; set; }
     }

@@ -13,7 +13,7 @@ namespace ExamenApi.DTOs
         public int? IdRecurso { get; set; }
         public string RecursoNombre { get; set; } = string.Empty;
         public int? IdPadre { get; set; }
-        public string Predecesora { get; set; } = string.Empty;
+        public int? Predecesora { get; set; }
         public string Estado { get; set; } = string.Empty;
         public int? Progreso { get; set; }
     }
