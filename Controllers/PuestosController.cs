@@ -88,6 +88,14 @@ namespace ExamenApi.Controllers
             var success = await _repository.DeleteAsync(id);
             if (!success)
             {
+                // Verificar si es porque hay empleados vinculados
+                var empleadosCount = await _repository.GetEmpleadosCountByPuesto(id);
+                if (empleadosCount > 0)
+                {
+                    var errorMessage = $"No se puede eliminar el puesto porque tiene {empleadosCount} empleado(s) vinculado(s)";
+                    return BadRequest(errorMessage);
+                }
+                
                 return NotFound($"No se encontró el puesto con ID {id}");
             }
 

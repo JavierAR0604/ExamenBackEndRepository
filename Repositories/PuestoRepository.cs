@@ -75,14 +75,43 @@ namespace ExamenApi.Repositories
 
         public override async Task<bool> DeleteAsync(int id)
         {
+            try
+            {
+                using var connection = _dbConfig.CreateConnection();
+
+                // Verificar si hay empleados usando este puesto
+                var empleadosCount = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM Empleados WHERE IdPuesto = @IdPuesto",
+                    new { IdPuesto = id }
+                );
+
+                if (empleadosCount > 0)
+                {
+                    return false;
+                }
+
+                var parameters = new { IdPuesto = id };
+                var rowsAffected = await connection.ExecuteAsync(
+                    "sp_EliminarPuesto",
+                    parameters,
+                    commandType: System.Data.CommandType.StoredProcedure
+                );
+                return rowsAffected > 0;
+            }
+            catch (Exception)
+            {
+                // Opcional: loguear el error
+                return false;
+            }
+        }
+
+        public async Task<int> GetEmpleadosCountByPuesto(int idPuesto)
+        {
             using var connection = _dbConfig.CreateConnection();
-            var parameters = new { IdPuesto = id };
-            var rowsAffected = await connection.ExecuteAsync(
-                "sp_EliminarPuesto",
-                parameters,
-                commandType: System.Data.CommandType.StoredProcedure
+            return await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM Empleados WHERE IdPuesto = @IdPuesto",
+                new { IdPuesto = idPuesto }
             );
-            return rowsAffected > 0;
         }
     }
 } 
