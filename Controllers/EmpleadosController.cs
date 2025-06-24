@@ -11,10 +11,12 @@ namespace ExamenApi.Controllers
     public class EmpleadosController : ControllerBase
     {
         private readonly EmpleadoRepository _repository;
+        private readonly TareaRepository _tareaRepository;
 
-        public EmpleadosController(EmpleadoRepository repository)
+        public EmpleadosController(EmpleadoRepository repository, TareaRepository tareaRepository)
         {
             _repository = repository;
+            _tareaRepository = tareaRepository;
         }
 
         [HttpPost("ObtenerEmpleados")]
@@ -59,6 +61,13 @@ namespace ExamenApi.Controllers
         [HttpPost("EliminarEmpleado/{id}")]
         public async Task<IActionResult> DeleteEmpleado(int id)
         {
+            // Verificar si el empleado tiene tareas asignadas
+            var tareas = await _tareaRepository.GetTareasPorEmpleado(id);
+            if (tareas.Any())
+            {
+                return BadRequest($"No se puede eliminar el empleado porque tiene {tareas.Count()} tarea(s) asignada(s).");
+            }
+
             var success = await _repository.DeleteAsync(id);
             if (!success)
             {
