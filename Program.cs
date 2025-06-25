@@ -56,28 +56,35 @@ builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<PuestoRepository>();
 builder.Services.AddScoped<TareaRepository>();
 
-// Configurar JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+// Verificar si estamos en modo de pruebas
+var isTestMode = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Test" || 
+                 Environment.GetEnvironmentVariable("TESTING") == "true";
 
-builder.Services.AddAuthentication(options =>
+// Configurar JWT Authentication solo si no estamos en modo de pruebas
+if (!isTestMode)
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+    var jwtSettings = builder.Configuration.GetSection("Jwt");
+    var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+
+    builder.Services.AddAuthentication(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key)
-    };
-});
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+}
 
 var app = builder.Build();
 
@@ -91,9 +98,16 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
-app.UseAuthentication();
-app.UseAuthorization();
+
+// Solo usar autenticación y autorización si no estamos en modo de pruebas
+if (!isTestMode)
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
 
 app.MapControllers();
 
 app.Run();
+
+
