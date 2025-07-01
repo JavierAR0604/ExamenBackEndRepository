@@ -74,7 +74,7 @@ namespace ExamenApi.Controllers
                 return NotFound();
             }
 
-            return NoContent();
+            return Ok(new { mensaje = "Empleado eliminado exitosamente" });
         }
     }
 }
